@@ -43,7 +43,6 @@ blogsRouter.post('/', async (request, response) => {
     title: body.title,
     author: body.author,
     url: body.url,
-    likes: body.likes,
     user: user._id
   })
 
@@ -89,6 +88,20 @@ blogsRouter.delete('/:id', async (request, response) => {
   await Blog.findByIdAndRemove(request.params.id)
 
   response.status(204).end()
+})
+
+blogsRouter.post('/:id/comments', async (request, response) => {
+  const { id } = request.params
+  const { comment } = request.body
+  const blog = await Blog.findById(id)
+
+  if (!blog) {
+    return response.status(404).json({ error: 'request blog not found'})
+  }
+
+  blog.comments = blog.comments.concat(comment)
+  const savedBlog = await blog.save()
+  response.status(200).json(savedBlog)
 })
 
 module.exports = blogsRouter
